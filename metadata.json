@@ -1,0 +1,8 @@
+{
+  "name": "Remix TradePulse",
+  "description": "Real-time analytics and automated alerts for crypto, digital, and blitz trading assets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
