@@ -20,19 +20,22 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Find and grant execute permission for gradlew
-      run: |
-        find . -name "gradlew" -exec chmod +x {} +
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.7'
 
     - name: Build Debug APK with Gradle
       run: |
-        # এটি স্বয়ংক্রিয়ভাবে প্রজেক্টের যেকোনো স্থান থেকে gradlew খুঁজে বের করে বিল্ড করবে
-        if [ -f "./gradlew" ]; then
-          ./gradlew assembleDebug
-        elif [ -f "./iq-trade-app/gradlew" ]; then
-          cd iq-trade-app && ./gradlew assembleDebug
+        if [ -f "settings.gradle.kts" ] || [ -f "settings.gradle" ]; then
+          gradle assembleDebug
+        elif [ -d "iq" ]; then
+          cd iq && gradle assembleDebug
+        elif [ -d "iq-trade-app" ]; then
+          cd iq-trade-app && gradle assembleDebug
         else
-          find . -name "gradlew" -execdir ./gradlew assembleDebug \;
+          PROJECT_DIR=$(dirname $(find . -name "settings.gradle*" | head -n 1))
+          cd "$PROJECT_DIR" && gradle assembleDebug
         fi
 
     - name: Upload APK Artifact
