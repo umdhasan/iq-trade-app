@@ -20,15 +20,20 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Grant execute permission for gradlew
+    - name: Find and grant execute permission for gradlew
       run: |
-        cd iq-trade-app || true
-        chmod +x gradlew
+        find . -name "gradlew" -exec chmod +x {} +
 
     - name: Build Debug APK with Gradle
       run: |
-        cd iq-trade-app || true
-        ./gradlew assembleDebug
+        # এটি স্বয়ংক্রিয়ভাবে প্রজেক্টের যেকোনো স্থান থেকে gradlew খুঁজে বের করে বিল্ড করবে
+        if [ -f "./gradlew" ]; then
+          ./gradlew assembleDebug
+        elif [ -f "./iq-trade-app/gradlew" ]; then
+          cd iq-trade-app && ./gradlew assembleDebug
+        else
+          find . -name "gradlew" -execdir ./gradlew assembleDebug \;
+        fi
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
