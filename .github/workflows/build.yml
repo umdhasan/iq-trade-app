@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
+ts:
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -22,14 +22,16 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: |
+        cd iq-trade-app || true
         chmod +x gradlew
 
     - name: Build Debug APK with Gradle
       run: |
+        cd iq-trade-app || true
         ./gradlew assembleDebug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: "**/app/build/outputs/apk/debug/app-debug.apk"
