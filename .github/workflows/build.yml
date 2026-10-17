@@ -25,20 +25,40 @@ jobs:
       with:
         gradle-version: '8.7'
 
-    - name: Prepare Project and Missing Files
+    - name: Prepare Project & Fix Missing Configs
       run: |
-        # যদি রিপোজিটরিতে জিপ ফাইলটি থেকে থাকে, তবে সেখান থেকে সব ফাইল নিখুঁতভাবে বের করে নেওয়া হবে
+        # ১. জিপ ফাইল থাকলে এক্সট্রাক্ট করবে
         if [ -f "IQ_Option_App.zip" ]; then
           unzip -o IQ_Option_App.zip
+        fi
+
+        # ২. প্রজেক্টের মূল ফোল্ডার খুঁজে বের করা
+        if [ -d "iq" ] && [ -f "iq/settings.gradle.kts" ]; then
+          TARGET_DIR="iq"
+        else
+          TARGET_DIR="."
+        fi
+
+        cd "$TARGET_DIR"
+
+        # ৩. local.properties এবং .env ফাইল না থাকলে তৈরি করা (Secrets প্লাগিনের জন্য)
+        touch local.properties
+        if [ -f ".env.example" ] && [ ! -f ".env" ]; then
+          cp .env.example .env
+        fi
+
+        # ৪. google-services.json না থাকলে ডামি ফাইল তৈরি করা কিংবা প্লাগিন বাইপাস করা
+        if [ ! -f "app/google-services.json" ]; then
+          sed -i '/google.services/d' app/build.gradle.kts || true
+          sed -i '/google-services/d' app/build.gradle.kts || true
         fi
 
     - name: Build Debug APK with Gradle
       run: |
         if [ -d "iq" ] && [ -f "iq/settings.gradle.kts" ]; then
-          cd iq && gradle assembleDebug
-        else
-          gradle assembleDebug
+          cd iq
         fi
+        gradle assembleDebug --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
