@@ -25,93 +25,27 @@ jobs:
       with:
         gradle-version: '8.7'
 
-    - name: Auto-Fix Missing Files and Configs
+    - name: Build Debug APK
       run: |
-        # ১. জিপ ফাইল থাকলে সেটি এক্সট্রাক্ট করা
         if [ -f "IQ_Option_App.zip" ]; then
           unzip -o IQ_Option_App.zip
         fi
-
-        # ২. প্রজেক্টের মূল ফোল্ডার নির্বাচন করা
         if [ -d "iq" ] && [ -f "iq/settings.gradle.kts" ]; then
           cd iq
         elif [ -d "iq-trade-app" ] && [ -f "iq-trade-app/settings.gradle.kts" ]; then
           cd iq-trade-app
         fi
-
-        echo "Current Project Directory: $(pwd)"
-
-        # ৩. যদি gradle/libs.versions.toml মিসিং থাকে, তবে সেটি স্বয়ংক্রিয়ভাবে তৈরি করা
         mkdir -p gradle
-        if [ ! -f "gradle/libs.versions.toml" ]; then
-          echo "Creating missing libs.versions.toml..."
-          cat << 'EOF' > gradle/libs.versions.toml
-        [versions]
-        agp = "8.5.2"
-        kotlin = "2.0.0"
-        coreKtx = "1.13.1"
-        junit = "4.13.2"
-        junitVersion = "1.2.1"
-        espressoCore = "3.6.1"
-        lifecycleRuntimeKtx = "2.8.4"
-        activityCompose = "1.9.1"
-        composeBom = "2024.06.00"
-        ksp = "2.0.0-1.0.22"
-        room = "2.6.1"
-        roborazzi = "1.20.0"
-        robolectric = "4.12.2"
-        secrets = "2.0.1"
-        googleServices = "4.4.2"
-        okhttp = "4.12.0"
-        gson = "2.11.0"
-        coroutines = "1.8.1"
-
-        [libraries]
-        androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-        junit = { group = "junit", name = "junit", version.ref = "junit" }
-        androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-        androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-        androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-        androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
-        androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-        androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-        androidx-ui = { group = "androidx.compose.ui", name = "ui" }
-        androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-        androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-        androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-        androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-        androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-        androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-        androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-        androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-        androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-        androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-        okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-        gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-        kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
-        robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-        roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
-        roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
-        roborazzi-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
-
-        [plugins]
-        android-application = { id = "com.android.application", version.ref = "agp" }
-        kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-        kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-        google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-        roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
-        secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
-        google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-        EOF
-        fi
-
-        # ৪. local.properties এবং ডামি google-services.json তৈরি করা (যাতে প্লাগিন এরর না দেয়)
+        printf '[versions]\nagp = "8.5.2"\nkotlin = "2.0.0"\ncoreKtx = "1.13.1"\njunit = "4.13.2"\njunitVersion = "1.2.1"\nespressoCore = "3.6.1"\nlifecycleRuntimeKtx = "2.8.4"\nactivityCompose = "1.9.1"\ncomposeBom = "2024.06.00"\nksp = "2.0.0-1.0.22"\nroom = "2.6.1"\nroborazzi = "1.20.0"\nrobolectric = "4.12.2"\nsecrets = "2.0.1"\ngoogleServices = "4.4.2"\nokhttp = "4.12.0"\ngson = "2.11.0"\ncoroutines = "1.8.1"\n\n[libraries]\nandroidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }\njunit = { group = "junit", name = "junit", version.ref = "junit" }\nandroidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }\nandroidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }\nandroidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }\nandroidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }\nandroidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }\nandroidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }\nandroidx-ui = { group = "androidx.compose.ui", name = "ui" }\nandroidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }\nandroidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }\nandroidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }\nandroidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }\nandroidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }\nandroidx-material3 = { group = "androidx.compose.material3", name = "material3" }\nandroidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }\nandroidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }\nandroidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }\nandroidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }\nokhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }\ngson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }\nkotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }\nrobolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }\nroborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }\nroborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }\nroborazzi-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }\n\n[plugins]\nandroid-application = { id = "com.android.application", version.ref = "agp" }\nkotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }\nkotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }\ngoogle-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }\nroborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }\nsecrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }\ngoogle-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }\n' > gradle/libs.versions.toml
         touch local.properties
-        if [ -f ".env.example" ] && [ ! -f ".env" ]; then
-          cp .env.example .env
-        fi
+        if [ -f ".env.example" ] && [ ! -f ".env" ]; then cp .env.example .env; fi
         sed -i '/google.services/d' build.gradle.kts || true
         sed -i '/google.services/d' app/build.gradle.kts || true
         sed -i '/google-services/d' app/build.gradle.kts || true
+        gradle assembleDebug --stacktrace
 
-    - name: Build
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: "**/app/build/outputs/apk/debug/app-debug.apk"
