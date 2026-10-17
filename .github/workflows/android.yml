@@ -13,26 +13,55 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Extract Android Project if Zipped
+        run: |
+          if [ -f "TradePro_Android_Project.zip" ]; then
+            echo "Found TradePro_Android_Project.zip in root, extracting..."
+            unzip -o -q TradePro_Android_Project.zip
+          elif [ -f "public/TradePro_Android_Project.zip" ]; then
+            echo "Found TradePro_Android_Project.zip in public/, extracting..."
+            unzip -o -q public/TradePro_Android_Project.zip
+          elif [ -f "remix-tradepulse.zip" ]; then
+            echo "Found remix-tradepulse.zip, extracting..."
+            unzip -o -q remix-tradepulse.zip
+            if [ -f "TradePro_Android_Project.zip" ]; then
+              unzip -o -q TradePro_Android_Project.zip
+            fi
+          fi
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Create default .env file
-        run: cp .env.example .env
+      - name: Prepare Environment & Permissions
+        run: |
+          # যদি প্রজেক্ট কোনো সাব-ফোল্ডারে আনজিপ হয়ে থাকে, তবে সেটি রুটে নিয়ে আসা
+          if [ ! -f "gradlew" ]; then
+            GRADLEW_PATH=$(find . -maxdepth 3 -name "gradlew" | head -n 1)
+            if [ -n "$GRADLEW_PATH" ]; then
+              PROJECT_DIR=$(dirname "$GRADLEW_PATH")
+              echo "Moving project files from $PROJECT_DIR to root..."
+              shopt -s dotglob
+              mv "$PROJECT_DIR"/* .
+            fi
+          fi
+          chmod +x gradlew
+          if [ -f ".env.example" ] && [ ! -f ".env" ]; then
+            cp .env.example .env
+          fi
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: TradePro-IQ-Debug-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/build/outputs/apk/debug/*.apk"
