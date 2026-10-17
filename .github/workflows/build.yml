@@ -25,17 +25,19 @@ jobs:
       with:
         gradle-version: '8.7'
 
+    - name: Prepare Project and Missing Files
+      run: |
+        # যদি রিপোজিটরিতে জিপ ফাইলটি থেকে থাকে, তবে সেখান থেকে সব ফাইল নিখুঁতভাবে বের করে নেওয়া হবে
+        if [ -f "IQ_Option_App.zip" ]; then
+          unzip -o IQ_Option_App.zip
+        fi
+
     - name: Build Debug APK with Gradle
       run: |
-        if [ -f "settings.gradle.kts" ] || [ -f "settings.gradle" ]; then
-          gradle assembleDebug
-        elif [ -d "iq" ]; then
+        if [ -d "iq" ] && [ -f "iq/settings.gradle.kts" ]; then
           cd iq && gradle assembleDebug
-        elif [ -d "iq-trade-app" ]; then
-          cd iq-trade-app && gradle assembleDebug
         else
-          PROJECT_DIR=$(dirname $(find . -name "settings.gradle*" | head -n 1))
-          cd "$PROJECT_DIR" && gradle assembleDebug
+          gradle assembleDebug
         fi
 
     - name: Upload APK Artifact
